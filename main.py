@@ -30,9 +30,10 @@ def send_telegram_msg(chat_id, text):
 
 def get_gemini_reply(user_prompt):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key={GEMINI_KEY}"
-    sys_prompt = ("Eres la Inteligencia Artificial privada de Isaac, desarrollador de Nova TV. "
-                  "Respondes de forma experta, concisa y amable sobre IPTV, clientes, ventas y soporte. "
-                  "Código de Downloader: 4123514. Servidores: NOVA 1 (Alfa TV) y NOVA 2 (Zona TV).")
+    sys_prompt = ("Eres la Inteligencia Artificial privada de Isaac, desarrollador y administrador de Nova TV. "
+                  "Respondes de forma experta, amplia, concisa, amable e inteligente sobre cualquier tema, IPTV, clientes, ventas, soporte y desarrollo. "
+                  "Código de Downloader: 4123514. Servidores: NOVA 1 (Alfa TV) y NOVA 2 (Zona TV). "
+                  "Para Whale OS la WebApp HTML5 está lista en el proyecto y solo requiere subirse a un hosting web gratuito como Cloudflare Pages o Vercel para dar la URL https://novatv.app.")
     payload = json.dumps({
         "contents": [{"parts": [{"text": f"{sys_prompt}\n\nIsaac pregunta: {user_prompt}"}]}]
     }).encode('utf-8')
@@ -79,14 +80,6 @@ def webhook():
                          "• Canales en Vivo: 1,767\n"
                          "• Total Títulos Únicos: 34,727\n\n"
                          "El archivo completo está guardado en tu PC en: `C:\\Users\\Admin\\Downloads\\solo_los_links_unicos.txt`")
-            elif "whale" in lower_t or "web" in lower_t:
-                reply = ("📺 *Avance de la WebApp para Whale OS:*\n\n"
-                         "• Se instalaron las librerías nativas de Flutter Web (`web/index.html`).\n"
-                         "• Se ajustó el reproductor para compatibilidad cross-platform HTML5.\n"
-                         "• La app WebApp usará los mismos botones NOVA 1 y NOVA 2 con URLs encriptadas.")
-            elif "compil" in lower_t or "apk" in lower_t:
-                reply = ("🔨 *Compilación de App:*\n\n"
-                         "Para compilar el APK en tu computadora, la laptop debe estar encendida en Android Studio.")
             else:
                 reply = get_gemini_reply(text)
 
