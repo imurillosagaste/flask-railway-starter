@@ -1,6 +1,7 @@
 import os
 import json
-import requests
+import urllib.request
+import urllib.parse
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -11,20 +12,19 @@ ALLOWED_USER_ID = 8821953203
 
 def send_telegram_msg(chat_id, text):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    payload = {
+    payload = json.dumps({
         "chat_id": chat_id,
         "text": text,
         "parse_mode": "Markdown"
-    }
+    }).encode('utf-8')
+    req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'})
     try:
-        r = requests.post(url, json=payload, timeout=10)
-        if r.status_code != 200:
-            payload.pop("parse_mode", None)
-            requests.post(url, json=payload, timeout=10)
+        urllib.request.urlopen(req, timeout=10)
     except Exception as e:
         try:
-            payload.pop("parse_mode", None)
-            requests.post(url, json=payload, timeout=10)
+            payload = json.dumps({"chat_id": chat_id, "text": text}).encode('utf-8')
+            req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'})
+            urllib.request.urlopen(req, timeout=10)
         except:
             pass
 
@@ -33,21 +33,21 @@ def get_gemini_reply(user_prompt):
     sys_prompt = ("Eres la Inteligencia Artificial privada de Isaac, desarrollador de Nova TV. "
                   "Respondes de forma experta, concisa y amable sobre IPTV, clientes, ventas y soporte. "
                   "Código de Downloader: 4123514. Servidores: NOVA 1 (Alfa TV) y NOVA 2 (Zona TV).")
-    payload = {
+    payload = json.dumps({
         "contents": [{"parts": [{"text": f"{sys_prompt}\n\nIsaac pregunta: {user_prompt}"}]}]
-    }
+    }).encode('utf-8')
+    req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'})
     try:
-        r = requests.post(url, json=payload, timeout=10)
-        if r.status_code == 200:
-            data = r.json()
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
             return data['candidates'][0]['content']['parts'][0]['text']
     except Exception as e:
         pass
-    return f"🤖 Hola Isaac. Recibí tu mensaje: '{user_prompt}'. Asistente de Nova TV listo."
+    return f"🤖 Hola Isaac. Recibí tu mensaje: '{user_prompt}'. Asistente de Nova TV activo."
 
 @app.route('/', methods=['GET'])
 def home():
-    return "Servidor Webhook Nova TV 24/7 Activo en Railway"
+    return "Servidor Webhook Nova TV 24/7 Activo"
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
